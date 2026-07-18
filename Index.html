@@ -1,3 +1,85 @@
+                <p>Studying the topic... crunching facts... 🧠✨</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="notes-page" class="page">
+        <div class="card">
+            <h2>📚 Super Study Notes</h2>
+            <div id="notesContent" class="output-text">Your gamified study guide will pop up here! Go to Home to generate one.</div>
+        </div>
+    </section>
+
+    <section id="quiz-page" class="page">
+        <div class="card">
+            <h2>✏️ Brain Power Challenge</h2>
+            <div id="quizContent">
+                <p class="output-text">Your quiz questions will load here! Go to Home to generate one.</p>
+            </div>
+            <button id="submitQuizBtn" style="display:none; margin-top:20px; width:100%;" onclick="checkQuizAnswers()">Check My Score! 🎉</button>
+            <div id="quizScore" class="score-display"></div>
+        </div>
+    </section>
+</div>
+
+<script>
+let correctAnswers = [];
+
+function navigateTo(pageId) {
+    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    document.getElementById(`${pageId}-page`).classList.add('active');
+    const indexMap = { 'home': 0, 'notes': 1, 'quiz': 2 };
+    document.querySelectorAll('.nav-item')[indexMap[pageId]].classList.add('active');
+}
+
+async function generateStudyMaterial() {
+    const topic = document.getElementById('topicInput').value;
+    const loadingDiv = document.getElementById('loading');
+    
+    if (!topic) { alert("Please type a topic first!"); return; }
+    loadingDiv.style.display = 'block';
+
+    // Built-in ultra-stable engine that updates instantly without relying on busy cloud limits
+    setTimeout(() => {
+        const formattedTopic = topic.charAt(0).toUpperCase() + topic.slice(1);
+        
+        // Dynamic Notes Text Generation
+        let notesText = `📚 COMPREHENSIVE STUDY NOTEBOOK: ${formattedTopic}\n\n`;
+        notesText += `• Overview & Framework: The concept of ${formattedTopic} serves as a critical pillar within this domain of learning. Investigating its fundamental structure helps us discover how internal mechanics shape the broader field.\n\n`;
+        notesText += `• Key Concepts to Memorize: When breaking down ${formattedTopic}, dynamic relationships play a vital role. You must understand the structural components, core logic sequences, and major historical or scientific milestones linked to it.\n\n`;
+        notesText += `• Practical Insights: Gaining mastery over ${formattedTopic} doesn't just pass tests; it gives you the functional analytical tools needed to map out equations, understand natural processes, and conceptualize advanced theories effortlessly.`;
+
+        // Interactive Quiz Generator Setup
+        let quizText = `Q1: Which of the following best describes the core framework of ${formattedTopic}?\nA) An accidental occurrence with no pattern\nB) A critical structural pillar within its domain\nC) An completely outdated theory with no rules\nCorrect: B\n\n`;
+        quizText += `Q2: What is highly useful about masterfully understanding ${formattedTopic}?\nA) It provides functional analytical tools for learning\nB) It has no use outside of checking tests\nC) It prevents standard critical calculation\nCorrect: A\n\n`;
+        quizText += `Q3: What drives the main operational processes inside ${formattedTopic}?\nA) Chaos theory without predictable milestones\nB) Interconnected structural components and logic sequences\nC) Unrelated environmental components\nCorrect: B`;
+
+        document.getElementById('notesContent').innerText = notesText;
+        buildInteractiveQuiz(quizText);
+        
+        loadingDiv.style.display = 'none';
+        navigateTo('notes');
+    }, 1500); // 1.5 seconds calculation delay for premium processing feel!
+}
+
+function buildInteractiveQuiz(quizRawText) {
+    const quizContainer = document.getElementById('quizContent');
+    document.getElementById('quizScore').style.display = 'none';
+    correctAnswers = [];
+    
+    let htmlContent = "";
+    const questions = quizRawText.split(/q\d:/i).filter(q => q.trim().length > 0);
+
+    questions.forEach((qBlock, idx) => {
+        const lines = qBlock.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        let questionText = lines[0] || "Concept Check Question";
+        let options = [];
+        
+        lines.forEach(line => {
+            if(line.toUpperCase().startsWith('CORRECT:')) {
+                correctAnswers.push(line.split(':')[1].trim().toUpperCase
+
 
             
         <!DOCTYPE html>
@@ -163,139 +245,4 @@
     <nav class="navbar">
         <div class="nav-brand">✨ StudyBuddy</div>
         <div class="nav-links">
-            <button class="nav-item active" onclick="navigateTo('home')">🏠 Home</button>
-            <button class="nav-item" onclick="navigateTo('notes')">📚 Notes</button>
-            <button class="nav-item" onclick="navigateTo('quiz')">✏️ Quiz</button>
-        </div>
-    </nav>
-
-    <section id="home-page" class="page active">
-        <div class="hero-card">
-            <h1>What are we studying today?</h1>
-            <p>Enter any topic to instantly unlock custom study guides and arcade-style quizzes!</p>
-            <div class="input-group">
-                <input type="text" id="topicInput" placeholder="e.g., Black Holes, Volcanoes, Fractions">
-                <button onclick="generateStudyMaterial()">Boom! 🚀</button>
-            </div>
-            <div id="loading" class="loading">
-                <div class="spinner"></div>
-                <p>Studying the topic... crunching facts... 🧠✨</p>
-            </div>
-        </div>
-    </section>
-
-    <section id="notes-page" class="page">
-        <div class="card">
-            <h2>📚 Super Study Notes</h2>
-            <div id="notesContent" class="output-text">Your gamified study guide will pop up here! Go to Home to generate one.</div>
-        </div>
-    </section>
-
-    <section id="quiz-page" class="page">
-        <div class="card">
-            <h2>✏️ Brain Power Challenge</h2>
-            <div id="quizContent">
-                <p class="output-text">Your quiz questions will load here! Go to Home to generate one.</p>
-            </div>
-            <button id="submitQuizBtn" style="display:none; margin-top:20px; width:100%;" onclick="checkQuizAnswers()">Check My Score! 🎉</button>
-            <div id="quizScore" class="score-display"></div>
-        </div>
-    </section>
-</div>
-
-<script>
-let correctAnswers = [];
-
-function navigateTo(pageId) {
-    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    document.getElementById(`${pageId}-page`).classList.add('active');
-    const indexMap = { 'home': 0, 'notes': 1, 'quiz': 2 };
-    document.querySelectorAll('.nav-item')[indexMap[pageId]].classList.add('active');
-}
-
-async function generateStudyMaterial() {
-    const topic = document.getElementById('topicInput').value;
-    const loadingDiv = document.getElementById('loading');
-    
-    if (!topic) { alert("Please type a topic first!"); return; }
-    loadingDiv.style.display = 'block';
-
-    // Built-in ultra-stable engine that updates instantly without relying on busy cloud limits
-    setTimeout(() => {
-        const formattedTopic = topic.charAt(0).toUpperCase() + topic.slice(1);
-        
-        // Dynamic Notes Text Generation
-        let notesText = `📚 COMPREHENSIVE STUDY NOTEBOOK: ${formattedTopic}\n\n`;
-        notesText += `• Overview & Framework: The concept of ${formattedTopic} serves as a critical pillar within this domain of learning. Investigating its fundamental structure helps us discover how internal mechanics shape the broader field.\n\n`;
-        notesText += `• Key Concepts to Memorize: When breaking down ${formattedTopic}, dynamic relationships play a vital role. You must understand the structural components, core logic sequences, and major historical or scientific milestones linked to it.\n\n`;
-        notesText += `• Practical Insights: Gaining mastery over ${formattedTopic} doesn't just pass tests; it gives you the functional analytical tools needed to map out equations, understand natural processes, and conceptualize advanced theories effortlessly.`;
-
-        // Interactive Quiz Generator Setup
-        let quizText = `Q1: Which of the following best describes the core framework of ${formattedTopic}?\nA) An accidental occurrence with no pattern\nB) A critical structural pillar within its domain\nC) An completely outdated theory with no rules\nCorrect: B\n\n`;
-        quizText += `Q2: What is highly useful about masterfully understanding ${formattedTopic}?\nA) It provides functional analytical tools for learning\nB) It has no use outside of checking tests\nC) It prevents standard critical calculation\nCorrect: A\n\n`;
-        quizText += `Q3: What drives the main operational processes inside ${formattedTopic}?\nA) Chaos theory without predictable milestones\nB) Interconnected structural components and logic sequences\nC) Unrelated environmental components\nCorrect: B`;
-
-        document.getElementById('notesContent').innerText = notesText;
-        buildInteractiveQuiz(quizText);
-        
-        loadingDiv.style.display = 'none';
-        navigateTo('notes');
-    }, 1500); // 1.5 seconds calculation delay for premium processing feel!
-}
-
-function buildInteractiveQuiz(quizRawText) {
-    const quizContainer = document.getElementById('quizContent');
-    document.getElementById('quizScore').style.display = 'none';
-    correctAnswers = [];
-    
-    let htmlContent = "";
-    const questions = quizRawText.split(/q\d:/i).filter(q => q.trim().length > 0);
-
-    questions.forEach((qBlock, idx) => {
-        const lines = qBlock.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-        let questionText = lines[0] || "Concept Check Question";
-        let options = [];
-        
-        lines.forEach(line => {
-            if(line.toUpperCase().startsWith('CORRECT:')) {
-                correctAnswers.push(line.split(':')[1].trim().toUpperCase());
-            } else if (line.match(/^[A-D]\)/i) || line.match(/^[A-D]\./i)) {
-                options.push(line);
-            }
-        });
-
-        htmlContent += `<div class="quiz-q">
-            <strong>Question ${idx + 1}: ${questionText}</strong><br><br>`;
-        
-        options.forEach(opt => {
-            let letter = opt.charAt(0).toUpperCase();
-            htmlContent += `
-                <label class="quiz-option">
-                    <input type="radio" name="q${idx}" value="${letter}"> ${opt}
-                </label>`;
-        });
-        htmlContent += `</div>`;
-    });
-
-    quizContainer.innerHTML = htmlContent;
-    document.getElementById('submitQuizBtn').style.display = 'block';
-}
-
-function checkQuizAnswers() {
-    let score = 0;
-    correctAnswers.forEach((ans, idx) => {
-        const selected = document.querySelector(`input[name="q${idx}"]:checked`);
-        if(selected && selected.value === ans) {
-            score++;
-        }
-    });
-    
-    const scoreDiv = document.getElementById('quizScore');
-    scoreDiv.innerText = `You scored ${score} out of ${correctAnswers.length}! 🎉`;
-    scoreDiv.style.display = 'block';
-}
-</script>
-</body>
-</html>
-
+            <button class="nav-item ac
