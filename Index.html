@@ -88,11 +88,7 @@
         }
 
         .input-group { display: flex; flex-direction: column; gap: 15px; margin-top: 25px; }
-        
-        .selector-row {
-            display: flex;
-            gap: 12px;
-        }
+        .selector-row { display: flex; gap: 12px; }
 
         input, select {
             padding: 16px;
@@ -186,32 +182,32 @@
 
     <section id="home-page" class="page active">
         <div class="hero-card">
-            <h1>Dynamic Study Station</h1>
-            <p>Customize your study level to unlock hyper-targeted matching dashboards!</p>
+            <h1>AI Custom Studio</h1>
+            <p>Enter a topic and watch NVIDIA's custom open-source AI models build your study materials live!</p>
             
             <div class="input-group">
-                <input type="text" id="topicInput" placeholder="Enter topic (e.g., Gravity, Algebra, History)">
+                <input type="text" id="topicInput" placeholder="Enter topic (e.g., Photosynthesis, Geometry)">
                 
                 <div class="selector-row">
                     <select id="classSelect">
-                        <option value="Elementary (Class 1-5)">Class 1-5 (Basic)</option>
-                        <option value="Middle School (Class 6-8)" selected>Class 6-8 (Intermediate)</option>
-                        <option value="High School (Class 9-12)">Class 9-12 (Advanced)</option>
+                        <option value="Class 1-5 (Elementary School Level)">Class 1-5</option>
+                        <option value="Class 6-8 (Middle School Level)" selected>Class 6-8</option>
+                        <option value="Class 9-12 (High School Level)">Class 9-12</option>
                     </select>
                     
                     <select id="levelSelect">
-                        <option value="Easy">🟢 Easy Mode</option>
-                        <option value="Medium" selected>🟡 Medium Mode</option>
-                        <option value="Hard">🔴 Hard Mode</option>
+                        <option value="Easy">🟢 Easy</option>
+                        <option value="Medium" selected>🟡 Medium</option>
+                        <option value="Hard">🔴 Hard</option>
                     </select>
                 </div>
                 
-                <button onclick="generateDynamicMaterial()">Generate Setup 🚀</button>
+                <button onclick="generateAIContent()">Ask NVIDIA AI! 🚀</button>
             </div>
             
             <div id="loading" class="loading">
                 <div class="spinner"></div>
-                <p>Configuring personalized data dynamic layout... 🧠✨</p>
+                <p>NVIDIA AI is running model inference layers... 🧠✨</p>
             </div>
         </div>
     </section>
@@ -223,7 +219,7 @@
                 <span id="notesLevelBadge" class="badge badge-level">Level</span>
             </div>
             <h2>📚 Custom Study Guide</h2>
-            <div id="notesContent" class="output-text">Select options on Home to generate.</div>
+            <div id="notesContent" class="output-text">Your AI notes will load here.</div>
         </div>
     </section>
 
@@ -233,9 +229,9 @@
                 <span id="quizClassBadge" class="badge badge-class">Class</span>
                 <span id="quizLevelBadge" class="badge badge-level">Level</span>
             </div>
-            <h2>✏️ Target Level Quiz</h2>
+            <h2>✏️ Level-Matched Quiz</h2>
             <div id="quizContent">
-                <p class="output-text">Select options on Home to generate.</p>
+                <p class="output-text">Your dynamic AI quiz will load here.</p>
             </div>
             <button id="submitQuizBtn" style="display:none; margin-top:20px; width:100%;" onclick="checkQuizAnswers()">Verify Score! 🎉</button>
             <div id="quizScore" class="score-display"></div>
@@ -244,6 +240,9 @@
 </div>
 
 <script>
+// PASTE YOUR NEW NVIDIA API KEY HERE (Be sure to keep it secret!)
+const NVIDIA_API_KEY = "YOUR_NEW_NVIDIA_API_KEY_HERE"; 
+
 let correctAnswers = [];
 
 function navigateTo(pageId) {
@@ -254,74 +253,86 @@ function navigateTo(pageId) {
     document.querySelectorAll('.nav-item')[indexMap[pageId]].classList.add('active');
 }
 
-function generateDynamicMaterial() {
+async function generateAIContent() {
     const topic = document.getElementById('topicInput').value;
     const selectedClass = document.getElementById('classSelect').value;
     const selectedLevel = document.getElementById('levelSelect').value;
     const loadingDiv = document.getElementById('loading');
     
-    if (!topic) { alert("Please input a topic focus area first!"); return; }
+    if (!topic) { alert("Please input a topic first!"); return; }
+    if (NVIDIA_API_KEY.startsWith("YOUR")) { alert("Please paste your updated NVIDIA API key in the code first!"); return; }
+    
     loadingDiv.style.display = 'block';
 
-    // Update Dashboard Information Badges
-    document.getElementById('notesClassBadge').innerText = selectedClass;
+    document.getElementById('notesClassBadge').innerText = selectedClass.split(" ")[0] + " " + selectedClass.split(" ")[1];
     document.getElementById('notesLevelBadge').innerText = `Difficulty: ${selectedLevel}`;
-    document.getElementById('quizClassBadge').innerText = selectedClass;
+    document.getElementById('quizClassBadge').innerText = selectedClass.split(" ")[0] + " " + selectedClass.split(" ")[1];
     document.getElementById('quizLevelBadge').innerText = `Difficulty: ${selectedLevel}`;
 
-    setTimeout(() => {
-        const titleTopic = topic.charAt(0).toUpperCase() + topic.slice(1);
-        
-        let notesText = `📚 DYNAMIC LESSON NOTEBOOK: ${titleTopic.toUpperCase()}\n\n`;
-        let quizText = "";
+    const promptText = `You are a teacher formatting a student workbook.
+    Create comprehensive study notes about "${topic}" customized perfectly for students in ${selectedClass} at an "${selectedLevel}" difficulty level.
+    Directly after your notes, add exactly 3 multiple-choice questions tracking that level.
+    Format your output exactly like this so the app script parses it correctly:
+    
+    [Notes text here]
+    
+    QUIZ_START
+    Q1: Question text?
+    A) Option 1
+    B) Option 2
+    C) Option 3
+    Correct: A
+    
+    Q2: Question text?
+    A) Option 1
+    B) Option 2
+    C) Option 3
+    Correct: B
+    
+    Q3: Question text?
+    A) Option 1
+    B) Option 2
+    C) Option 3
+    Correct: C`;
 
-        // Dynamic Text Engine branches data based on user constraints
-        if (selectedClass.includes("Elementary")) {
-            notesText += `• The Big Idea: Let's explore ${titleTopic}! It is an exciting idea all about understanding how simple things work together around us.\n\n`;
-            notesText += `• Fun Fact Checklist: Remember that this concept forms the basic building blocks for cool science and math tricks you use daily!\n\n`;
-            notesText += `• Level Setup: This basic starter kit helps your brain grasp the introductory shapes and names cleanly.`;
+    try {
+        const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${NVIDIA_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: "google/gemma-4-31b-it",
+                messages: [{ role: "user", content: promptText }],
+                temperature: 0.7,
+                max_tokens: 1500
+            })
+        });
 
-            if (selectedLevel === "Easy") {
-                quizText = `Q1: Is learning about ${titleTopic} fun and useful?\nA) Yes, it builds helpful basic blocks\nB) No, it has no meaning at all\nCorrect: A\n\nQ2: What should we do when looking at a new basic topic?\nA) Ignore it completely\nB) Pay attention to the core introductory shapes and names\nCorrect: B`;
-            } else if (selectedLevel === "Medium") {
-                quizText = `Q1: What does this elementary lesson on ${titleTopic} act as?\nA) A complex matrix system\nB) Basic building blocks for cool tricks\nCorrect: B\n\nQ2: What is the main purpose of this layout starter kit?\nA) Grasping introductory shapes and names cleanly\nB) Computing high-level quantum tracking data\nCorrect: A`;
-            } else { // Hard
-                quizText = `Q1: Even when a concept like ${titleTopic} seems simple, what must you master?\nA) The absolute basic building block names and shapes precisely\nB) Only complex assumptions\nCorrect: A\n\nQ2: How should an elementary student approach these core ideas?\nA) By ignoring the basic framework entirely\nB) By studying how basic components work together around us\nCorrect: B`;
-            }
+        const data = await response.json();
+        const aiResponse = data.choices[0].message.content;
 
-        } else if (selectedClass.includes("Middle School")) {
-            notesText += `• Core Intermediate Objective: Analyzing ${titleTopic} at a intermediate grade level means stepping past definitions and tracking cause-and-effect processes.\n\n`;
-            notesText += `• Critical Connections: You need to understand how varying input levels modify output actions across standard system states.\n\n`;
-            notesText += `• Systems Study: Focus on structural features and functional charts that outline how separate moving properties form structural relationships.`;
+        let notesPart = aiResponse;
+        let quizPart = "";
 
-            if (selectedLevel === "Easy") {
-                quizText = `Q1: Middle school tracking shifts away from simple terms toward what?\nA) Pure guesswork routines\nB) Tracking cause-and-effect processes\nCorrect: B\n\nQ2: What is an intermediate goal here?\nA) Forgetting previous configurations\nB) Understanding standard structural properties and changes\nCorrect: B`;
-            } else if (selectedLevel === "Medium") {
-                quizText = `Q1: What happens when input levels fluctuate within ${titleTopic}?\nA) They alter system output actions across states\nB) They have absolutely zero correlation\nCorrect: A\n\nQ2: What should an intermediate student focus on analyzing?\nA) Structural features and functional interaction charts\nB) Random unrelated values\nCorrect: A`;
-            } else { // Hard
-                quizText = `Q1: Why are varying states within intermediate ${titleTopic} mechanics vital?\nA) Because tracking outputs shows system performance limits\nB) Because systems never fluctuate structural relations\nCorrect: A\n\nQ2: Advanced intermediate tracking expects users to evaluate:\nA) Complex causes, effect strings, and shifting property levels\nB) Basic vocabulary definitions only\nCorrect: A`;
-            }
-
-        } else { // High School / Advanced
-            notesText += `• Advanced Academic Analysis: Gaining proficiency in ${titleTopic} requires high-level structural breakdown, theoretical parsing, and systemic verification algorithms.\n\n`;
-            notesText += `• Complex Formulas & Axioms: Advanced curriculum tracks state that operational variables adapt non-linearly when subjected to extreme external stressors.\n\n`;
-            notesText += `• Integrated Theories: Students must synthesize cross-disciplinary mathematical formulas and scientific evidence to model hypothetical scenarios.`;
-
-            if (selectedLevel === "Easy") {
-                quizText = `Q1: Advanced high school tracks explain that operational variables adapt how?\nA) In simple static linear channels exclusively\nB) Non-linearly when subjected to extreme stressors\nCorrect: B\n\nQ2: What does systemic verification require from advanced scholars?\nA) Memorizing introductory vocab definitions only\nB) High-level structural breakdown and theoretical parsing\nCorrect: B`;
-            } else if (selectedLevel === "Medium") {
-                quizText = `Q1: What core action must an advanced student perform to successfully model ${titleTopic}?\nA) Synthesize cross-disciplinary formulas and scientific evidence\nB) Rely entirely on surface level guess protocols\nCorrect: A\n\nQ2: Under advanced standards, operational system variables behave:\nA) Non-linearly under shifting stress components\nB) Statically with zero property variations\nCorrect: A`;
-            } else { // Hard
-                quizText = `Q1: Which standard methodology yields true proof when solving complex advanced ${titleTopic} calculations?\nA) Cross-disciplinary theoretical synthesis and systemic algorithmic verification\nB) Ignoring multi-variable environmental stressors entirely\nCorrect: A\n\nQ2: Complete structural mastery allows you to project:\nA) Complex hypothetical system scenarios and non-linear behaviors\nB) Only entry-level elementary terminology blocks\nCorrect: A`;
-            }
+        if (aiResponse.includes("QUIZ_START")) {
+            const dynamicSplit = aiResponse.split("QUIZ_START");
+            notesPart = dynamicSplit[0];
+            quizPart = dynamicSplit[1];
         }
 
-        document.getElementById('notesContent').innerText = notesText;
-        buildInteractiveQuiz(quizText);
+        document.getElementById('notesContent').innerText = notesPart.trim();
+        buildInteractiveQuiz(quizPart);
         
         loadingDiv.style.display = 'none';
         navigateTo('notes');
-    }, 1200);
+
+    } catch (error) {
+        console.error(error);
+        loadingDiv.style.display = 'none';
+        alert("NVIDIA NIM Engine hiccuped. Double-check your API Key setup!");
+    }
 }
 
 function buildInteractiveQuiz(quizRawText) {
@@ -330,7 +341,7 @@ function buildInteractiveQuiz(quizRawText) {
     correctAnswers = [];
     
     let htmlContent = "";
-    const questions = quizRawText.split(/q\d:/i).filter(q => q.trim().length > 0);
+    const questions = quizRawText.split(/Q\d:/i).filter(q => q.trim().length > 0);
 
     questions.forEach((qBlock, idx) => {
         const lines = qBlock.split('\n').map(l => l.trim()).filter(l => l.length > 0);
@@ -359,7 +370,7 @@ function buildInteractiveQuiz(quizRawText) {
     });
 
     quizContainer.innerHTML = htmlContent;
-    document.getElementById('submitQuizBtn').style.display = 'block';
+    document.getElementById('submitQuizBtn').style.display = correctAnswers.length > 0 ? 'block' : 'none';
 }
 
 function checkQuizAnswers() {
