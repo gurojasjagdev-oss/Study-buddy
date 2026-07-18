@@ -1,40 +1,254 @@
-// Paste your NVIDIA key here (starts with nvapi-)
-const NVIDIA_API_KEY = "YOUR_NVIDIA_API_KEY_HERE"; 
-// Choose your preferred model ID from above
-const MODEL_ID = "import requests
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyBuddy AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --primary-grad: linear-gradient(135deg, #ff007f, #7928ca);
+            --btn-grad: linear-gradient(135deg, #00f2fe, #4facfe);
+            --background: linear-gradient(180deg, #f3f4f6 0%, #e5e7eb 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text: #2d3748;
+        }
 
-invoke_url = "https://integrate.api.nvidia.com/v1/chat/completions"
-stream = False
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--background);
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+        }
 
-headers = {
-    "Authorization": "Bearer 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",
-    "Accept": "text/event-stream" if stream else "application/json",
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--primary-grad);
+            padding: 15px 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        .nav-brand {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 24px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .nav-links { display: flex; gap: 8px; }
+        .nav-item {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            padding: 10px 18px;
+            font-size: 15px;
+            color: white;
+            cursor: pointer;
+            border-radius: 20px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        .nav-item.active, .nav-item:hover {
+            background-color: white;
+            color: #7928ca;
+            transform: scale(1.05);
+        }
+
+        .page {
+            display: none;
+            padding: 25px 15px;
+            max-width: 650px;
+            margin: 0 auto;
+            animation: fadeIn 0.4s ease-out;
+        }
+        .page.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-card, .card {
+            background: var(--card-bg);
+            padding: 35px;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            border: 2px solid white;
+        }
+        h1, h2 {
+            font-family: 'Fredoka', sans-serif;
+            color: #4a5568;
+            margin-top: 0;
+        }
+        h1 {
+            background: var(--primary-grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .input-group { display: flex; flex-direction: column; gap: 15px; margin-top: 25px; }
+        .selector-row { display: flex; gap: 12px; }
+
+        input, select {
+            padding: 16px;
+            border: 3px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: bold;
+            background: white;
+            color: var(--text);
+            flex: 1;
+        }
+        input:focus, select:focus { border-color: #ff007f; outline: none; }
+        
+        button {
+            background: var(--btn-grad);
+            color: white;
+            border: none;
+            padding: 16px 28px;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(79, 172, 254, 0.3);
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 30px;
+            font-weight: bold;
+            color: #718096;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0,0,0,0.1);
+            border-top: 4px solid #ff007f;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .output-text { white-space: pre-wrap; line-height: 1.8; font-size: 17px; }
+        .quiz-q { background: #f7fafc; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid #00f2fe; }
+        .quiz-option { display: block; margin: 8px 0; cursor: pointer; font-weight: 600; }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 5px;
+            margin-bottom: 15px;
+            color: white;
+        }
+        .badge-class { background: #7928ca; }
+        .badge-level { background: #ff007f; }
+
+        .score-display {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: #e6fffa;
+            color: #234e52;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    <nav class="navbar">
+        <div class="nav-brand">✨ StudyBuddy</div>
+        <div class="nav-links">
+            <button class="nav-item active" onclick="navigateTo('home')">🏠 Home</button>
+            <button class="nav-item" onclick="navigateTo('notes')">📚 Notes</button>
+            <button class="nav-item" onclick="navigateTo('quiz')">✏️ Quiz</button>
+        </div>
+    </nav>
+
+    <section id="home-page" class="page active">
+        <div class="hero-card">
+            <h1>AI Custom Studio</h1>
+            <p>Enter a topic and watch the NVIDIA backend engine securely compile your materials!</p>
+            
+            <div class="input-group">
+                <input type="text" id="topicInput" placeholder="Enter topic (e.g., Photosynthesis, Geometry)">
+                
+                <div class="selector-row">
+                    <select id="classSelect">
+                        <option value="Class 1-5 (Elementary School Level)">Class 1-5</option>
+                        <option value="Class 6-8 (Middle School Level)" selected>Class 6-8</option>
+                        <option value="Class 9-12 (High School Level)">Class 9-12</option>
+                    </select>
+                    
+                    <select id="levelSelect">
+                        <option value="Easy">🟢 Easy</option>
+                        <option value="Medium" selected>🟡 Medium</option>
+                        <option value="Hard">🔴 Hard</option>
+                    </select>
+                </div>
+                
+                <button onclick="generateAIContent()">Ask NVIDIA AI! 🚀</button>
+            </div>
+            
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Calling secure serverless edge layout function... 🧠✨</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="notes-page" class="page">
+        <div class="card">
+            <div>
+                <span id="notesClassBadge" class="badge badge-class">Class</span>
+                <span id="notesLevelBadge" class="badge badge-level">Level</span>
+            </div>
+            <h2>📚 Custom Study Guide</h2>
+            <div id="notesContent" class="output-text">Your AI notes will load here.</div>
+        </div>
+    </section>
+
+    <section id="quiz-page" class="page">
+        <div class="card">
+            <div>
+                <span id="quizClassBadge" class="badge badge-class">Class</span>
+                <span id="quizLevelBadge" class="badge badge-level">Level</span>
+            </div>
+            <h2>✏️ Level-Matched Quiz</h2>
+            <div id="quizContent">
+                <p class="output-text">Your dynamic AI quiz will load here.</p>
+            </div>
+            <button id="submitQuizBtn" style="display:none; margin-top:20px; width:100%;" onclick="checkQuizAnswers()">Verify Score! 🎉</button>
+            <div id="quizScore" class="score-display"></div>
+        </div>
+    </section>
+</div>
+
+<script>
+let correctAnswers = [];
+
+function navigateTo(pageId) {
+    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    document.getElementById(`${pageId}-page`).classList.add('active');
+    const indexMap = { 'home': 0, 'notes': 1, 'quiz': 2 };
+    document.querySelectorAll('.nav-item')[indexMap[pageId]].classList.add('active');
 }
-
-payload = {
-  "messages": [
-    {
-      "role": "user",
-      "content": ""
-    }
-  ],
-  "model": "google/gemma-4-31b-it",
-  "chat_template_kwargs": {
-    "enable_thinking": True
-  },
-  "max_tokens": 16384,
-  "stream": stream,
-  "temperature": 1,
-  "top_p": 0.95
-}
-
-response = requests.post(invoke_url, headers=headers, json=payload, stream=stream)
-if stream:
-    for line in response.iter_lines():
-        if line:
-            print(line.decode("utf-8"))
-else:
-    print(response.json())"; 
 
 async function generateAIContent() {
     const topic = document.getElementById('topicInput').value;
@@ -43,42 +257,24 @@ async function generateAIContent() {
     const loadingDiv = document.getElementById('loading');
     
     if (!topic) { alert("Please input a topic first!"); return; }
-    if (NVIDIA_API_KEY.startsWith("YOUR")) { alert("Paste your NVIDIA key first!"); return; }
     
     loadingDiv.style.display = 'block';
 
-    const promptText = `You are a teacher formatting a student workbook. 
-    Create comprehensive study notes about "${topic}" customized perfectly for students in ${selectedClass} at an "${selectedLevel}" difficulty level.
-    Directly after your notes, add exactly 3 multiple-choice questions matching that level.
-    Format your output exactly like this:
-    
-    [Notes text here]
-    
-    QUIZ_START
-    Q1: Question text?
-    A) Option 1
-    B) Option 2
-    C) Option 3
-    Correct: A`;
+    document.getElementById('notesClassBadge').innerText = selectedClass.split(" ")[0] + " " + selectedClass.split(" ")[1];
+    document.getElementById('notesLevelBadge').innerText = `Difficulty: ${selectedLevel}`;
+    document.getElementById('quizClassBadge').innerText = selectedClass.split(" ")[0] + " " + selectedClass.split(" ")[1];
+    document.getElementById('quizLevelBadge').innerText = `Difficulty: ${selectedLevel}`;
 
     try {
-        // NVIDIA uses standard OpenAI-style format endpoints
-        const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+        // Calls the secure serverless edge function we setup on Netlify
+        const response = await fetch("/api/study", {
             method: "POST",
-            headers: { 
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${NVIDIA_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: MODEL_ID,
-                messages: [{ role: "user", content: promptText }],
-                temperature: 0.5,
-                max_tokens: 1024
-            })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ topic, classLevel: selectedClass, difficulty: selectedLevel })
         });
 
         const data = await response.json();
-        const aiResponse = data.choices[0].message.content;
+        const aiResponse = data.text;
 
         let notesPart = aiResponse;
         let quizPart = "";
@@ -98,6 +294,59 @@ async function generateAIContent() {
     } catch (error) {
         console.error(error);
         loadingDiv.style.display = 'none';
-        alert("NVIDIA NIM interface encountered an issue. Verify your API Key!");
+        alert("Serverless endpoint issue. Make sure your environment variables are configured in Netlify!");
     }
 }
+
+function buildInteractiveQuiz(quizRawText) {
+    const quizContainer = document.getElementById('quizContent');
+    document.getElementById('quizScore').style.display = 'none';
+    correctAnswers = [];
+    
+    let htmlContent = "";
+    const questions = quizRawText.split(/Q\d:/i).filter(q => q.trim().length > 0);
+
+    questions.forEach((qBlock, idx) => {
+        const lines = qBlock.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        let questionText = lines[0] || "Target Evaluation Query";
+        let options = [];
+        
+        lines.forEach(line => {
+            if(line.toUpperCase().startsWith('CORRECT:')) {
+                correctAnswers.push(line.split(':')[1].trim().toUpperCase());
+            } else if (line.match(/^[A-D]\)/i) || line.match(/^[A-D]\./i)) {
+                options.push(line);
+            }
+        });
+
+        htmlContent += `<div class="quiz-q">
+            <strong>Question ${idx + 1}: ${questionText}</strong><br><br>`;
+        
+        options.forEach(opt => {
+            let letter = opt.charAt(0).toUpperCase();
+            htmlContent += `
+                <label class="quiz-option">
+                    <input type="radio" name="q${idx}" value="${letter}"> ${opt}
+                </label>`;
+        });
+        htmlContent += `</div>`;
+    });
+
+    quizContainer.innerHTML = htmlContent;
+    document.getElementById('submitQuizBtn').style.display = correctAnswers.length > 0 ? 'block' : 'none';
+}
+
+function checkQuizAnswers() {
+    let score = 0;
+    correctAnswers.forEach((ans, idx) => {
+        const selected = document.querySelector(`input[name="q${idx}"]:checked`);
+        if(selected && selected.value === ans) { score++; }
+    });
+    
+    const scoreDiv = document.getElementById('quizScore');
+    scoreDiv.innerText = `Quiz Complete! You scored ${score} out of ${correctAnswers.length}! 🎉`;
+    scoreDiv.style.display = 'block';
+}
+</script>
+</body>
+</html>
