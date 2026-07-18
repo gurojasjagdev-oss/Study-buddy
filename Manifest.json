@@ -1,0 +1,15 @@
+{
+  "short_name": "StudyBuddy",
+  "name": "StudyBuddy AI Assistant",
+  "icons": [
+    {
+      "src": "PASTE_YOUR_NEW_IMAGE_LINK_HERE",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/index.html",
+  "background_color": "#4f46e5",
+  "display": "standalone",
+  "theme_color": "#4f46e5"
+}
